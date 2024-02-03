@@ -37,6 +37,11 @@ function Coin() {
   const [loading, setLoading] = useState(true);
   const { coinId } = useParams<RouteParams>();
   const { state } = useLocation<RouteState>();
+  useEffect(() => {
+    (asnyc () => {
+      
+    })();
+  }, []);
 
   return (
     <Container>
