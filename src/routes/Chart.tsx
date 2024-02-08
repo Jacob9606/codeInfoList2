@@ -1,6 +1,6 @@
 import React from "react";
 import { useQuery } from "react-query";
-import ReactApexCharts from "react-apexcharts"; // 'ReactApexCharts'로 수정
+import ReactApexCharts from "react-apexcharts";
 import { fetchCoinHistory } from "../api";
 
 interface IHistorical {
@@ -19,9 +19,20 @@ interface ChartProps {
 }
 
 function Chart({ coinId }: ChartProps) {
-  const { isLoading, data } = useQuery<IHistorical[]>(["ohlcv", coinId], () =>
-    fetchCoinHistory(coinId)
+  const { isLoading, data } = useQuery<IHistorical[]>(
+    ["ohlcv", coinId],
+    () => fetchCoinHistory(coinId),
+    {
+      refetchInterval: 10000,
+    }
   );
+
+  // 데이터 포맷을 변경하여 x축에 날짜를 표시할 수 있도록 함
+  const formattedData =
+    data?.map((price) => ({
+      x: new Date(price.time_close), // 날짜를 Date 객체로 변환하여 x에 할당
+      y: price.close,
+    })) ?? [];
 
   return (
     <div>
@@ -57,9 +68,21 @@ function Chart({ coinId }: ChartProps) {
               show: false,
             },
             xaxis: {
-              labels: { show: false },
-              axisTicks: { show: false },
               axisBorder: { show: false },
+              axisTicks: { show: false },
+              labels: { show: false },
+              type: "datetime",
+              categories: data?.map((price) => price.time_close) ?? [],
+            },
+            fill: {
+              type: "gradient",
+              gradient: { gradientToColors: ["#0be881"], stops: [0, 100] },
+            },
+            colors: ["#0fbcf9"],
+            tooltip: {
+              y: {
+                formatter: (value) => `$ ${value.toFixed(2)}`,
+              },
             },
           }}
         />
